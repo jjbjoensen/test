@@ -26,6 +26,19 @@ log_mh = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
   list('pars' = pars, 'acc' = acc)
 }
 
-wack = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
+#' lmh_cpp
+#'
+#' This function does something useful.
+#' @export
+lmh_cpp = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
   log_mh_cpp(n, par0, sigmas, ll, lprior, lsampler, lsample_dens)
 }
+
+#' lmh_cpp
+#'
+#' This function does something useful.
+#' @export
+mh_cpp = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
+  mh_cpp(n, par0, sigmas, ll, lprior, lsampler, lsample_dens)
+}
+
