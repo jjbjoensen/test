@@ -12,7 +12,7 @@ create_mh_object = function(par0, mh_choice, params_history, acc_history, moving
 }
 
 mh_validator = function(n, par0, sigmas, likelihood, lprior, sampler, lsample_dens) {
-  stopifnot("Provided n is an integer"=is.integer(n))
+  stopifnot("Provided n is an integer"=is.integer(nL))
   stopifnot("Provided par0 is not a vector"=is.vector(par0))
   stopifnot("Provided (log-)likelihood is not a function"=is.function(ll))
   stopifnot("Provided (log-)prior is not a function"=is.function(lprior))
