@@ -5,7 +5,7 @@ log_mh = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
   par = par0
 
   for (i in seq_len(n)) {
-    park = lsampler(par0, par, sigmas)
+    park = sampler(par0, par, sigmas)
     a1 = ll(park) - ll(par)
     a2 = lprior(park, par0, sigmas) - lprior(par, par0, sigmas)
     a3 = lsample_dens(par, par0, park, sigmas) - lsample_dens(park, par0, par, sigmas)
@@ -24,21 +24,5 @@ log_mh = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
     }
   }
   list('pars' = pars, 'acc' = acc)
-}
-
-#' lmh_cpp
-#'
-#' This function does something useful.
-#' @export
-lmh_cpp = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
-  log_mh_cpp(n, par0, sigmas, ll, lprior, lsampler, lsample_dens)
-}
-
-#' lmh_cpp
-#'
-#' This function does something useful.
-#' @export
-mh_cpp = function(n, par0, sigmas, ll, lprior, lsampler, lsample_dens) {
-  mh_cpp(n, par0, sigmas, ll, lprior, lsampler, lsample_dens)
 }
 

@@ -25,11 +25,3 @@ mh = function(n, par0, sigmas, likelihood, prior, sampler, sample_dens) {
   list('pars' = pars, 'acc' = acc)
 }
 
-mu = 1
-s = 2
-n = 1e5
-td = rnorm(n, mu, s)
-
-ll = function(par) {
-  log_likelhood(td, par)
-}
