@@ -103,7 +103,7 @@ create_nm_object = function(fn, par0, lower, upper, N, iterations, best_par,
   )
 }
 
-
+#' @export
 nelder_mead = function(fn, par0 = NULL, lower, upper, N = 1e4, tol = 1e-10) {
 
 
