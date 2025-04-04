@@ -153,7 +153,7 @@ print.nm_object = function(obj) {
 plot.nm_object = function(obj) {
   val_hist = obj$val_history
   val_hist_vec = sapply(val_hist, function(x) x[1])
-  print(val_hist_vec)
+
   point_hist = do.call(rbind, lapply(obj$simplex_history, function(x) x[1, ]))
 
   d = ncol(point_hist)
