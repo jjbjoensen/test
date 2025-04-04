@@ -44,10 +44,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// create_simplex
+NumericMatrix create_simplex(NumericVector lower, NumericVector upper, Nullable<NumericVector> par0, Nullable<NumericVector> stepsize);
+RcppExport SEXP _mcmcpack_create_simplex(SEXP lowerSEXP, SEXP upperSEXP, SEXP par0SEXP, SEXP stepsizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type lower(lowerSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type upper(upperSEXP);
+    Rcpp::traits::input_parameter< Nullable<NumericVector> >::type par0(par0SEXP);
+    Rcpp::traits::input_parameter< Nullable<NumericVector> >::type stepsize(stepsizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_simplex(lower, upper, par0, stepsize));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mcmcpack_log_mh_cpp", (DL_FUNC) &_mcmcpack_log_mh_cpp, 7},
     {"_mcmcpack_mh_cpp", (DL_FUNC) &_mcmcpack_mh_cpp, 7},
+    {"_mcmcpack_create_simplex", (DL_FUNC) &_mcmcpack_create_simplex, 4},
     {NULL, NULL, 0}
 };
 

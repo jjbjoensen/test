@@ -9,3 +9,7 @@ mh_cpp <- function(n, par0, sigmas, likelihood, prior, sampler, sample_dens) {
     .Call(`_mcmcpack_mh_cpp`, n, par0, sigmas, likelihood, prior, sampler, sample_dens)
 }
 
+create_simplex <- function(lower, upper, par0 = NULL, stepsize = NULL) {
+    .Call(`_mcmcpack_create_simplex`, lower, upper, par0, stepsize)
+}
+

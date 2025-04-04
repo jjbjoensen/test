@@ -97,3 +97,59 @@ List mh_cpp(int n, NumericVector par0, NumericVector sigmas,
     Named("parameters") = pars
   );
 }
+
+
+// [[Rcpp::export]]
+NumericMatrix create_simplex(NumericVector lower, NumericVector upper,
+                             Nullable<NumericVector> par0 = R_NilValue,
+                             Nullable<NumericVector> stepsize = R_NilValue) {
+
+  int n = lower.size();
+  NumericVector x0(n);
+
+  if (par0.isNull()) {
+
+    for (int i = 0; i < n; i++) {
+      x0[i] = lower[i] + (upper[i] - lower[i]) * unif_rand();
+    }
+  } else {
+
+    NumericVector par_vec(par0.get());
+    for (int i = 0; i < n; i++) {
+      x0[i] = par_vec[i];
+    }
+  }
+
+  NumericMatrix nn(n + 1, n);
+
+  NumericVector hj(n);
+  if (stepsize.isNull()) {
+    for (int i = 1; i < n; i++) {
+      hj[i] = (upper[i] - lower[i]) * unif_rand();
+    }
+  }
+  else {
+    NumericVector step_vec(stepsize.get());
+    for (int i = 0; i < n; i++) {
+      hj[i] = step_vec[i];
+    }
+  }
+
+
+  for (int j = 0; j < n; j++) {
+    nn(0, j) = x0[j];
+  }
+
+
+  NumericVector vec0(n, 0.0);
+  for (int i = 0; i < n; i++) {
+    NumericVector tmp = clone(vec0);
+    tmp[i] = 1.0;
+    for (int j = 0; j < n; j++) {
+      nn(i + 1, j) = x0[j] + hj[j] * tmp[j];
+    }
+  }
+
+  return nn;
+
+}

@@ -12,7 +12,7 @@ create_mh_object = function(par0, mh_choice, params_history, acc_history, moving
 }
 
 mh_validator = function(n, par0, sigmas, likelihood, lprior, sampler, lsample_dens) {
-  stopifnot("Provided n is an integer"=is.integer(nL))
+  stopifnot("Provided n cannot be converted to integer"=is.integer(as.integer(n)))
   stopifnot("Provided par0 is not a vector"=is.vector(par0))
   stopifnot("Provided (log-)likelihood is not a function"=is.function(ll))
   stopifnot("Provided (log-)prior is not a function"=is.function(lprior))
@@ -24,13 +24,13 @@ metropolis_hastings = function(n, par0, sigmas, likelihood, prior, sampler,
                                sample_dens, log = FALSE) {
 
   mh_validator(n, par0, sigmas, ll, prior, sampler, sample_dens)
-   if (log == TRUE) {
-     mh_choice = log_mh_cpp
-     sampler_choice = "log"
-   } else {
-     mh_choice = mh_cpp
-     sampler_choice = "standard"
-   }
+  if (log == TRUE) {
+    mh_choice = log_mh_cpp
+    sampler_choice = "log"
+  } else {
+    mh_choice = mh_cpp
+    sampler_choice = "standard"
+  }
 
   mh_run = mh_choice(n, par0, sigmas, likelihood, prior, sampler, sample_dens)
   params_history = mh_run$parameters
@@ -85,3 +85,5 @@ plot.mh_object = function(obj) {
   }
 
 }
+
+
