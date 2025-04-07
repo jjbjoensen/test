@@ -164,9 +164,9 @@ evt_plot = function(plot_choice, data) {
 print.evt_plot_object = function(obj) {
   cat("EVT Plot Summary:\n")
   cat("Chosen plot:", obj$plot_choice, "\n")
-  cat("Data:", obj$data, "\n")
-  cat("X:", obj$x, "\n")
-  cat("Estimator:", obj$y, "\n")
+  cat("Data summary:", summary(obj$data), "\n")
+  cat("X:", head(obj$x), "\n")
+  cat("Estimator:", head(obj$y), "\n")
 
 
   invisible(obj)
