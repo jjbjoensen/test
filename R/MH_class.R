@@ -19,6 +19,7 @@ mh_validator = function(n, par0, sigmas, likelihood, lprior, sampler, lsample_de
   stopifnot("Provided sampler is not a function"=is.function(sampler))
   stopifnot("Provided sample (log-)density is not a function"=is.function(lsample_dens))
 }
+
 #' @export
 metropolis_hastings = function(n, par0, sigmas, likelihood, prior, sampler,
                                sample_dens, log = FALSE) {
