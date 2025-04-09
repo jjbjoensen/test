@@ -28,7 +28,7 @@ rweibull_G = function(n, alpha, gamma) {
   samples = numeric(n)
   u = runif(n)
   for (i in seq_len(n)) {
-    samples[[i]] = (-log(u[[i]]))^(1/gamma) / alpha
+    samples[[i]] = (-log(u[[i]]))^(1/gamma) * alpha
   }
   samples
 }

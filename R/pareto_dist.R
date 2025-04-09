@@ -22,3 +22,4 @@ ppareto = function(q, alpha, theta) {
 qpareto = function(p, alpha, theta) {
   theta * ((1 - p)^(-1/alpha) - 1)
 }
+
