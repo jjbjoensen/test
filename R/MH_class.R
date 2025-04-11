@@ -88,5 +88,68 @@ plot.mh_object = function(obj) {
 }
 
 
+#' @export
+summarise.mh_object = function(obj, burn_in) {
+  n = length(obj$par0)
+  map = numeric(n)
+  bayes = numeric(n)
+  acc_ratio = numeric(n)
+  params_history = obj$params_history
+  acc_history = obj$acc_history
+  acc_ratio = mean(acc_history)
+  m = length(params_history)
+
+  for (i in seq_len(n)) {
+    map[[i]] = estimate_mode(params_history[, i][burn_in:m])
+    bayes[[i]] = mean(params_history[, i][burn_in:m])
+  }
+
+  list('MAP' = map, 'Bayes' = bayes, 'Acc_ratio' = acc_ratio)
+
+}
+
+#' @export
+optimize_mh = function(n_range = 1e4, n_optim = 1e3, optim_maxit = 50,
+                       sigmas0, par0, likelihood, prior, sampler,
+                       prior_optim = F, sample_dens, log = FALSE) {
+
+  range_tries = c(1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)
+  m = length(range_tries)
+  acc_ratios = numeric(m)
+  k = length(par0)
+
+  for (i in seq_len(m)) {
+    if (prior_optim == FALSE) {
+      sigmas = c(rep(range_tries[[i]],k),tail(sigmas0, k))
+    } else {
+      sigmas = rep(range_tries,length(sigmas0))
+    }
+
+    cat("sigmas", sigmas, "\n")
+    tests = metropolis_hastings(n_range, par0, sigmas, likelihood, prior,
+                                sampler, sample_dens, log)
+    acc_ratios[[i]] = sum(tests$acc_history)
+  }
+
+  if (prior_optim == FALSE) {
+    sigma_range = c(rep(range_tries[which.max(acc_ratios)],k),tail(sigmas0, k))
+  } else {
+    sigma_range = rep(range_tries[which.max(acc_ratios)],length(sigmas0))
+  }
+
+  fn = function(sigmas) {
+    tests =  metropolis_hastings(n_optim, par0, sigmas, likelihood, prior,
+                                 sampler, sample_dens, log)
+    m = sum(tests$acc_history)
+
+    -1 * m
+  }
+
+  best_sigma = optim(sigma_range, fn, method = "Nelder-Mead",
+                     control = list(optim_maxit))
+
+  list('best_sigmas'  = best_sigma$par, 'acc_ratio' = best_sigma$value / n_optim)
+
+}
 
 
