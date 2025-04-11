@@ -148,7 +148,7 @@ optimize_mh = function(n_range = 1e4, n_optim = 1e3, optim_maxit = 50,
   best_sigma = optim(sigma_range, fn, method = "Nelder-Mead",
                      control = list(optim_maxit))
 
-  list('best_sigmas'  = best_sigma$par, 'acc_ratio' = best_sigma$value / n_optim)
+  list('best_sigmas'  = best_sigma$par, 'acc_ratio' = -1 * best_sigma$value / n_optim)
 
 }
 
