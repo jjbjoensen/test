@@ -5,9 +5,4 @@ Just some of the stuff I use for my thesis. Includes:
 - Plots used in EVT (evt_plot): Hill, DEdH, mean excess and qq against standard exponentials.
 - Custom Weibull distribution (2 different parametrizations); rweibull_std & rweibull_G, etc.
 
-Currently no documentation etc.
-
-Planned updates:
- - Weibull regression.
- - EM-algorithm for standard mixtures.
- - Metropolis-Hastings for standard distributions.
+Currently little to no documentation etc; will be added when time.
