@@ -101,7 +101,7 @@ summarise.mh_object = function(obj, burn_in) {
 
   for (i in seq_len(n)) {
     map[[i]] = estimate_mode(params_history[, i][burn_in:m])
-    bayes[[i]] = mean(params_history[, i][burn_in:m])
+    bayes[[i]] = mean(params_history[, i][burn_in:m], na.rm = TRUE)
   }
 
   list('MAP' = map, 'Bayes' = bayes, 'Acc_ratio' = acc_ratio)
