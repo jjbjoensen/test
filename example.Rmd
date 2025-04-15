@@ -1,0 +1,224 @@
+---
+title: "Example of use"
+output: html_document
+date: "2025-04-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Get package and create data
+
+We would like to fit a Weibull and Pareto distribution to some data. 
+We generate the data:
+```{r}
+# devtools::install_github("jjbjoensen/test", force = TRUE)
+
+library(mcmcpack)
+
+par = c(1.7, 4)
+n = 1e4
+pareto_data = rpareto(n, par[[1]], par[[2]])
+weibull_data = rweibull_std(n, par[[1]], par[[2]])
+```
+
+We start with starting parameters
+```{r}
+par0 = c(5,1)
+```
+
+## Metropolis-Hastings
+
+We need the log-likelihoods:
+```{r}
+pareto_ll = function(par) {
+  sum(log(dpareto(pareto_data, par[[1]], par[[2]])))
+}
+weibull_ll = function(par) {
+  sum(log(dweibull_std(weibull_data, par[[1]], par[[2]])))
+}
+```
+
+We want to use Independent Metropolis-Hastings (IMH) and Random-Walk Metropolis-Hastings (RWMH).
+We do this with and without a prior. The priors and samplers are then:
+```{r}
+log_prior_flat = function(par, par0, sigmas) {
+  0
+}
+
+log_prior_normal = function(par, par0, sigmas) {
+  p1 = log(dnorm(par[[1]], mean = par0[[1]], sd = sigmas[[3]]))
+  p2 = log(dnorm(par[[2]], mean = par0[[2]], sd = sigmas[[4]]))
+  p1 + p2
+}
+
+
+log_proposal_ind = function(par, par0, park, sigmas) {
+  p1 = log(dnorm(par[[1]], mean = par0[[1]], sd = sigmas[[1]]))
+  p2 = log(dnorm(par[[2]], mean = par0[[2]], sd = sigmas[[2]]))
+  
+  p1 + p2
+}
+
+# Isn't used anyway! So just set to 1.
+log_proposal_rw = function(par, par0, park, sigmas) {
+  1
+}
+
+
+sampler_ind = function(par, par0, sigmas) {
+  p1 = rnorm(1, mean = par0[[1]], sd = sigmas[[1]])
+  p2 = rnorm(1, mean = par0[[2]], sd = sigmas[[2]])
+ 
+  c(p1, p2) 
+}
+
+sampler_rw = function(par, par0, sigmas) {
+    p1 = par[[1]] + rnorm(1, mean = 0, sd = sigmas[[1]])
+    p2 = par[[2]] + rnorm(1, mean = 0, sd = sigmas[[2]])
+    
+    c(p1, p2) 
+}
+
+```
+
+We want some good acceptance probabilities. Around 25% for RWMH, but that is hard, 
+so we just go after as many as possible. There is a function for this:
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+pareto_imh_sigmas_opt = optimize_mh(par0 = par0, n_range = 1e3, optim_maxit = 15, likelihood = pareto_ll, 
+                sigmas0 = rep(1, 4), prior = log_prior_normal,
+                sampler = sampler_ind, sample_dens = log_proposal_ind, 
+                prior_optim = F, log = TRUE)
+
+weibull_imh_sigmas_opt = optimize_mh(par0 = par0, n_range = 1e3, optim_maxit = 15, likelihood = weibull_ll, 
+                sigmas0 = rep(1, 4), prior = log_prior_normal,
+                sampler = sampler_ind, sample_dens = log_proposal_ind, 
+                prior_optim = F, log = TRUE)
+```
+
+We substract the best sigmas:
+```{r}
+opt_sigma_pareto = pareto_imh_sigmas_opt$best_sigmas
+opt_sigma_weibull = weibull_imh_sigmas_opt$best_sigmas
+opt_sigma_pareto
+opt_sigma_weibull
+```
+We do manually the RWMH:
+```{r}
+test_pareto = metropolis_hastings(1e3, par0, rep(1e-4,4),likelihood = pareto_ll, 
+                                  prior = log_prior_normal,
+                                  sampler = sampler_rw, sample_dens = log_proposal_rw,
+                                  log = T)
+mean(test_pareto$acc_history)
+test_weibull = metropolis_hastings(1e3, par0, rep(1e-4,4),likelihood = weibull_ll, 
+                                  prior = log_prior_normal,
+                                  sampler = sampler_rw, sample_dens = log_proposal_rw,
+                                  log = T)
+                                  
+mean(test_weibull$acc_history)
+
+```
+Now we start the algorithm 10 thousand times:
+```{r}
+m = 1e4
+set.seed(2020)
+pareto_imh_flat = metropolis_hastings(m, par0, opt_sigma_pareto,likelihood = pareto_ll, 
+                                  prior = log_prior_flat,
+                                  sampler = sampler_ind, sample_dens = log_proposal_ind,
+                                  log = T)
+pareto_imh_normal = metropolis_hastings(m, par0, opt_sigma_pareto,likelihood = pareto_ll, 
+                                  prior = log_prior_normal,
+                                  sampler = sampler_ind, sample_dens = log_proposal_ind,
+                                  log = T)
+pareto_rwmh_flat = metropolis_hastings(m, par0, rep(1e-4,4),likelihood = pareto_ll, 
+                                  prior = log_prior_flat,
+                                  sampler = sampler_rw, sample_dens = log_proposal_rw,
+                                  log = T)
+pareto_rwmh_normal = metropolis_hastings(m, par0, rep(1e-4,4),likelihood = pareto_ll, 
+                                  prior = log_prior_normal,
+                                  sampler = sampler_rw, sample_dens = log_proposal_rw,
+                                  log = T)
+
+weibull_imh_flat = metropolis_hastings(m, par0, opt_sigma_pareto,likelihood = weibull_ll, 
+                                  prior = log_prior_flat,
+                                  sampler = sampler_ind, sample_dens = log_proposal_ind,
+                                  log = T)
+weibull_imh_normal = metropolis_hastings(m, par0, opt_sigma_pareto,likelihood = weibull_ll, 
+                                  prior = log_prior_normal,
+                                  sampler = sampler_ind, sample_dens = log_proposal_ind,
+                                  log = T)
+weibull_rwmh_flat = metropolis_hastings(m, par0, rep(1e-4,4),likelihood = weibull_ll, 
+                                  prior = log_prior_flat,
+                                  sampler = sampler_rw, sample_dens = log_proposal_rw,
+                                  log = T)
+weibull_rwmh_normal = metropolis_hastings(m, par0, rep(1e-4,4),likelihood = weibull_ll, 
+                                  prior = log_prior_normal,
+                                  sampler = sampler_rw, sample_dens = log_proposal_rw,
+                                  log = T)
+
+
+
+```
+
+To get a feel for converge, we check the plots:
+```{r}
+plot(pareto_imh_flat)
+plot(pareto_imh_normal)
+plot(pareto_rwmh_flat)
+plot(pareto_rwmh_normal)
+
+plot(weibull_imh_flat)
+plot(weibull_imh_normal)
+plot(weibull_rwmh_flat)
+plot(weibull_rwmh_normal)
+```
+As expected, RWMH does not work, but IMH seems like it does. It probably would be preferable to make a longer chain, but this
+works for the purpose of illustration. Let us just use 3,000 burn in. This yields the results:
+```{r}
+burn_in = 3 * 1e3
+cat("Pareto IMH flat: \n")
+summarise.mh_object(pareto_imh_flat, burn_in)
+cat("Pareto IMH normal: \n")
+summarise.mh_object(pareto_imh_normal, burn_in)
+cat("Pareto RWMH flat: \n")
+summarise.mh_object(pareto_rwmh_flat, burn_in)
+cat("Pareto RWMH normal: \n")
+summarise.mh_object(pareto_rwmh_normal, burn_in)
+
+cat("Weibull IMH flat: \n")
+summarise.mh_object(weibull_imh_flat, burn_in)
+cat("Weibull IMH normal: \n")
+summarise.mh_object(weibull_imh_normal, burn_in)
+cat("Weibull RWMH flat: \n")
+summarise.mh_object(weibull_rwmh_flat, burn_in)
+cat("Weibull RWMH flat: \n")
+summarise.mh_object(weibull_rwmh_normal, burn_in)
+
+```
+
+Results are for IMH about $\alpha\in (1.6,1.8)$ which is encapsulates the true value of $1.7$ pretty well. For $\phi$ we have estimates around $\phi\in(4.5,4.65)$ which is not as close, but this is not really an example where Metropolis-Hastings works well. Acceptance ratio very low, but as long as it works, we are happy. For simple models optimization algorithms are (almost always) preferable, so let us try standard BFGS:
+```{r}
+opt_pareto = function(par) {
+  -pareto_ll(par)
+}
+opt_weibull = function(par) {
+  -weibull_ll(par)
+
+}
+
+pareto_optim = optim(par0, opt_pareto, method = "BFGS")
+weibull_optim =  optim(par0, opt_weibull, method = "BFGS")
+```
+
+This gives results:
+```{r}
+pareto_optim$par
+weibull_optim$par
+
+```
+Weibull is definitely better in this case, but it not clear that the pareto is better than Metropolis-Hastings. Estimation for heavy tails is hard, and this is clear here. This is why we use MCMC. For heavy tails, however, Metropolis-Hastings is not necessarily (geometrically) ergodic, but MALA is. Unfortunately, we have not implemented this yet.
+
+
+
+
